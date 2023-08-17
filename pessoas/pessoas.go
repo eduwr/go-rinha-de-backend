@@ -46,5 +46,15 @@ func (p *Pessoa) Create(db *sqlx.DB) (*Pessoa, error) {
 		return nil, err
 	}
 
+	for _, stackValue := range p.Stack {
+		_, err = db.Exec(`
+			INSERT INTO stacks (pessoa_id, stack_value)
+			VALUES ($1, $2)`, p.Id, stackValue)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return p, nil
 }
