@@ -14,25 +14,38 @@ type CustomContext struct {
 }
 
 func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
-	app.Get("/", func(c *fiber.Ctx) error {
-		c.Accepts("application/json")
-		return c.SendString("Hello, World!")
-	})
-
 	app.Get("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
 		return c.SendString("Not Implemented!")
 	})
 
+	app.Get("/pessoas/:id", func(c *fiber.Ctx) error {
+		c.Accepts("application/json")
+		id := c.Params("id")
+		println("ID ///")
+		println(id)
+
+		p := new(pessoas.PessoaWithStack)
+		p.Id = id
+		err := p.Show(db)
+
+		if err != nil {
+			return c.Status(404).SendString("Not Found")
+
+		}
+
+		return c.Status(200).JSON(p)
+	})
+
 	app.Post("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-		p := new(pessoas.Pessoa)
+		p := new(pessoas.PessoaWithStack)
 
 		if err := c.BodyParser(p); err != nil {
 			return c.Status(422).SendString("Unprocessable Entity")
 		}
 
-		p, err := p.Create(db)
+		err := p.Create(db)
 
 		if err != nil {
 			return c.Status(422).SendString(err.Error())
@@ -40,10 +53,6 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 
 		c.Set("Location", fmt.Sprintf("/pessoas/%s", p.Id))
 		return c.Status(201).SendString("Pessoa created successfully")
-	})
-	app.Get("/pessoas/:id", func(c *fiber.Ctx) error {
-		c.Accepts("application/json")
-		return c.SendString("Not Implemented!")
 	})
 
 	app.Get("/contagem-pessoas", func(c *fiber.Ctx) error {
