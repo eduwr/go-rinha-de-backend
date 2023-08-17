@@ -29,13 +29,13 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 		p := new(pessoas.Pessoa)
 
 		if err := c.BodyParser(p); err != nil {
-			return err
+			return c.Status(422).SendString("Unprocessable Entity")
 		}
 
 		p, err := p.Create(db)
 
 		if err != nil {
-			return err
+			return c.Status(422).SendString(err.Error())
 		}
 
 		c.Set("Location", fmt.Sprintf("/pessoas/%s", p.Id))
