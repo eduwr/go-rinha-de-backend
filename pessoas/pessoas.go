@@ -1,16 +1,16 @@
 package pessoas
 
 import (
-	"errors"
-
-	"github.com/go-playground/validator/v10"
+	"github.com/eduwr/go-rinha-de-backend/rinhaguard"
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type Pessoa struct {
 	Id         string   `json:"id" db:"id" validate:"required"`
-	Apelido    string   `json:"apelido" db:"apelido" validate:"required"`
-	Nome       string   `json:"nome" db:"nome" validate:"required,datetime=2006-01-02"`
-	Nascimento string   `json:"nascimento" db:"nascimento"`
+	Apelido    string   `json:"apelido" db:"apelido" validate:"required,max=32"`
+	Nome       string   `json:"nome" db:"nome" validate:"required,max=100"`
+	Nascimento string   `json:"nascimento" db:"nascimento" validate:"datetime=2006-01-02"`
 	Stack      []string `json:"stack" db:"stack"`
 }
 
@@ -29,17 +29,22 @@ var PessoaSchema = `
 	);
 `
 
-func (p *Pessoa) Validate() error {
-	validate := validator.New()
-	err := validate.Struct(p)
+func (p *Pessoa) Create(db *sqlx.DB) (*Pessoa, error) {
+	id := uuid.New()
+	p.Id = id.String()
+
+	err := rinhaguard.Check(p)
 	if err != nil {
-		// Convert validation errors to a single error message
-		var errMsg string
-		for _, err := range err.(validator.ValidationErrors) {
-			errMsg += err.Field() + " is invalid; "
-		}
-		return errors.New(errMsg)
+		return nil, err
 	}
 
-	return nil
+	_, err = db.NamedExec(`
+	INSERT INTO pessoas (id, apelido, nome, nascimento)
+	VALUES (:id, :apelido, :nome, :nascimento)`, p)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
 }

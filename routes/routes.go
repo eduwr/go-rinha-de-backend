@@ -1,13 +1,19 @@
 package routes
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/eduwr/go-rinha-de-backend/pessoas"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
-func RegisterRoutes(app *fiber.App) {
+type CustomContext struct {
+	*fiber.Ctx
+	DB *sqlx.DB
+}
+
+func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
 		return c.SendString("Hello, World!")
@@ -26,15 +32,15 @@ func RegisterRoutes(app *fiber.App) {
 			return err
 		}
 
-		if err := p.Validate(); err != nil {
+		p, err := p.Create(db)
+
+		if err != nil {
 			return err
 		}
 
-		log.Println(p.Apelido)
-		log.Println(p.Nascimento)
-		return c.JSON(p)
+		c.Set("Location", fmt.Sprintf("/pessoas/%s", p.Id))
+		return c.Status(201).SendString("Pessoa created successfully")
 	})
-
 	app.Get("/pessoas/:id", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
 		return c.SendString("Not Implemented!")

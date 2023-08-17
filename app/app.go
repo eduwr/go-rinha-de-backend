@@ -5,6 +5,7 @@ import (
 
 	"github.com/eduwr/go-rinha-de-backend/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type App struct {
@@ -23,8 +24,8 @@ func NewApp(n string) App {
 	}
 }
 
-func (a *App) Setup() {
-	routes.RegisterRoutes(a.Client)
+func (a *App) Setup(db *sqlx.DB) {
+	routes.RegisterRoutes(a.Client, db)
 }
 
 func (a *App) Serve(p string) {

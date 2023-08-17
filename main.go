@@ -22,6 +22,6 @@ func main() {
 	db.MustExec(pessoas.PessoaSchema)
 
 	a := app.NewApp("Go! Rinha de Backend")
-	a.Setup()
+	a.Setup(db)
 	a.Serve(":3333")
 }
