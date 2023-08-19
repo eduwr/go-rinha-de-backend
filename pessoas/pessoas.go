@@ -176,3 +176,12 @@ func Index(t string, db *sqlx.DB) ([]PessoaWithStack, error) {
 
 	return pessoas, nil
 }
+
+func Count(db *sqlx.DB) int {
+	query := `
+		SELECT count(*) from pessoas;
+	`
+	var count int
+	db.Get(&count, query)
+	return count
+}

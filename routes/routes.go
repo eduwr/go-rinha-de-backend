@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/eduwr/go-rinha-de-backend/pessoas"
 	"github.com/gofiber/fiber/v2"
@@ -59,6 +60,8 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 
 	app.Get("/contagem-pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-		return c.SendString("Not Implemented!")
+
+		count := pessoas.Count(db)
+		return c.Status(200).SendString(strconv.Itoa(count))
 	})
 }
