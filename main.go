@@ -18,6 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer db.Close()
 
 	db.MustExec(pessoas.PessoaSchema)
 

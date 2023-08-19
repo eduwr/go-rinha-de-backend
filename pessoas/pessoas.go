@@ -2,6 +2,7 @@ package pessoas
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/eduwr/go-rinha-de-backend/rinhaguard"
 	"github.com/google/uuid"
@@ -9,6 +10,11 @@ import (
 )
 
 type Stack []string
+
+func NewStackFromString(str string) Stack {
+	stackSlice := strings.Split(str, ",")
+	return Stack(stackSlice)
+}
 
 type Pessoa struct {
 	Id         string `json:"id" db:"id" validate:"required"`
@@ -92,12 +98,6 @@ func (p *PessoaWithStack) Show(db *sqlx.DB) error {
 		)
 		rows.Scan(&Id, &Apelido, &Nome, &Nascimento, &Stack)
 
-		fmt.Println(Id,
-			Apelido,
-			Nome,
-			Nascimento,
-			Stack)
-
 		p.Apelido = Apelido
 		p.Nome = Nome
 		p.Nascimento = Nascimento
@@ -105,4 +105,50 @@ func (p *PessoaWithStack) Show(db *sqlx.DB) error {
 	}
 
 	return nil
+}
+
+func Index(db *sqlx.DB) ([]PessoaWithStack, error) {
+	var pessoas []PessoaWithStack
+	query := `
+		SELECT
+			id,
+			apelido,
+			nome,
+			nascimento,
+			string_agg(s.stack_value, ',') AS stack
+		FROM
+			pessoas p
+		LEFT JOIN stacks s ON
+			p.id = s.pessoa_id
+		GROUP BY
+			p.id,
+			p.apelido,
+			p.nome,
+			p.nascimento
+	`
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var (
+			Id,
+			Apelido,
+			Nome,
+			Nascimento,
+			Stack string
+		)
+		rows.Scan(&Id, &Apelido, &Nome, &Nascimento, &Stack)
+
+		s := NewStackFromString(Stack)
+		p := Pessoa{Id: Id, Apelido: Apelido, Nome: Nome, Nascimento: Nascimento}
+
+		pessoas = append(pessoas, PessoaWithStack{
+			Pessoa: p,
+			Stack:  s,
+		})
+	}
+
+	return pessoas, nil
 }

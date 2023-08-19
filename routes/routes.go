@@ -16,14 +16,18 @@ type CustomContext struct {
 func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 	app.Get("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-		return c.SendString("Not Implemented!")
+
+		p, err := pessoas.Index(db)
+		if err != nil {
+			return c.Status(422).SendString(err.Error())
+		}
+
+		return c.Status(200).JSON(p)
 	})
 
 	app.Get("/pessoas/:id", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
 		id := c.Params("id")
-		println("ID ///")
-		println(id)
 
 		p := new(pessoas.PessoaWithStack)
 		p.Id = id
