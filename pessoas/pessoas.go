@@ -2,7 +2,6 @@ package pessoas
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/eduwr/go-rinha-de-backend/rinhaguard"
@@ -92,7 +91,6 @@ func Show(id string, db *sqlx.DB) (*PessoaWithStack, error) {
 
 	rows, err := db.Queryx(query, id)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 
@@ -115,15 +113,15 @@ func Show(id string, db *sqlx.DB) (*PessoaWithStack, error) {
 
 	err = rinhaguard.Check(p)
 	if err != nil {
-		fmt.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	return p, nil
 }
 
-func Index(db *sqlx.DB) ([]PessoaWithStack, error) {
-	var pessoas []PessoaWithStack
+func Index(t string, db *sqlx.DB) ([]PessoaWithStack, error) {
+	pessoas := []PessoaWithStack{}
+
 	query := `
 		SELECT
 			id,
@@ -135,13 +133,24 @@ func Index(db *sqlx.DB) ([]PessoaWithStack, error) {
 			pessoas p
 		LEFT JOIN stacks s ON
 			p.id = s.pessoa_id
+		WHERE
+			p.nome ILIKE $1 OR
+			p.apelido ILIKE $1 OR
+			EXISTS (
+		        SELECT 1
+		        FROM stacks s
+		        WHERE s.pessoa_id = p.id AND s.stack_value ILIKE $1
+		    )
 		GROUP BY
 			p.id,
 			p.apelido,
 			p.nome,
 			p.nascimento
+		LIMIT 50
 	`
-	rows, err := db.Query(query)
+
+	rows, err := db.Queryx(query, "%"+t+"%")
+
 	if err != nil {
 		return nil, err
 	}

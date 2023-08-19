@@ -17,7 +17,8 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 	app.Get("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
 
-		p, err := pessoas.Index(db)
+		t := c.Query("t")
+		p, err := pessoas.Index(t, db)
 		if err != nil {
 			return c.Status(422).SendString(err.Error())
 		}
