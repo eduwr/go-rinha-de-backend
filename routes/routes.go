@@ -29,13 +29,10 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 		c.Accepts("application/json")
 		id := c.Params("id")
 
-		p := new(pessoas.PessoaWithStack)
-		p.Id = id
-		err := p.Show(db)
+		p, err := pessoas.Show(id, db)
 
 		if err != nil {
 			return c.Status(404).SendString("Not Found")
-
 		}
 
 		return c.Status(200).JSON(p)
@@ -43,20 +40,20 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 
 	app.Post("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-		p := new(pessoas.PessoaWithStack)
+		p := pessoas.PessoaWithStack{}
 
-		if err := c.BodyParser(p); err != nil {
+		if err := c.BodyParser(&p); err != nil {
 			return c.Status(422).SendString("Unprocessable Entity")
 		}
 
-		err := p.Create(db)
+		createdP, err := pessoas.Create(p, db)
 
 		if err != nil {
 			return c.Status(422).SendString(err.Error())
 		}
 
-		c.Set("Location", fmt.Sprintf("/pessoas/%s", p.Id))
-		return c.Status(201).SendString("Pessoa created successfully")
+		c.Set("Location", fmt.Sprintf("/pessoas/%s", createdP.Id))
+		return c.Status(201).SendString("pessoa created successfully")
 	})
 
 	app.Get("/contagem-pessoas", func(c *fiber.Ctx) error {

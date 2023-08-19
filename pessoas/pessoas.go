@@ -1,6 +1,7 @@
 package pessoas
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,8 +13,7 @@ import (
 type Stack []string
 
 func NewStackFromString(str string) Stack {
-	stackSlice := strings.Split(str, ",")
-	return Stack(stackSlice)
+	return Stack(strings.Split(str, ","))
 }
 
 type Pessoa struct {
@@ -43,13 +43,13 @@ var PessoaSchema = `
 	);
 `
 
-func (p *PessoaWithStack) Create(db *sqlx.DB) error {
+func Create(p PessoaWithStack, db *sqlx.DB) (*PessoaWithStack, error) {
 	id := uuid.New()
 	p.Id = id.String()
 
 	err := rinhaguard.Check(p)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = db.NamedExec(`
@@ -57,7 +57,7 @@ func (p *PessoaWithStack) Create(db *sqlx.DB) error {
 	VALUES (:id, :apelido, :nome, :nascimento)`, p)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, stackValue := range p.Stack {
@@ -66,26 +66,34 @@ func (p *PessoaWithStack) Create(db *sqlx.DB) error {
 			VALUES ($1, $2)`, p.Id, stackValue)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return &p, nil
 }
 
-func (p *PessoaWithStack) Show(db *sqlx.DB) error {
+func Show(id string, db *sqlx.DB) (*PessoaWithStack, error) {
 	query := `
-		SELECT id, apelido, nome, nascimento, stack_value as stack
-		FROM pessoas p
+		SELECT
+			id,
+			apelido,
+			nome,
+			TO_CHAR(nascimento, 'YYYY-MM-DD') AS nascimento,
+			stack_value AS stack
+		FROM
+			pessoas p
 		LEFT JOIN stacks s
 		ON p.id = s.pessoa_id
-		WHERE p.id = $1
+		WHERE
+			p.id = $1
 	`
+	p := new(PessoaWithStack)
 
-	rows, err := db.Queryx(query, p.Id)
+	rows, err := db.Queryx(query, id)
 	if err != nil {
 		fmt.Println(err.Error())
-		return err
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -98,13 +106,20 @@ func (p *PessoaWithStack) Show(db *sqlx.DB) error {
 		)
 		rows.Scan(&Id, &Apelido, &Nome, &Nascimento, &Stack)
 
+		p.Id = Id
 		p.Apelido = Apelido
 		p.Nome = Nome
 		p.Nascimento = Nascimento
 		p.Stack = append(p.Stack, Stack)
 	}
 
-	return nil
+	err = rinhaguard.Check(p)
+	if err != nil {
+		fmt.Println(err)
+		return nil, errors.New("not found")
+	}
+
+	return p, nil
 }
 
 func Index(db *sqlx.DB) ([]PessoaWithStack, error) {
@@ -114,7 +129,7 @@ func Index(db *sqlx.DB) ([]PessoaWithStack, error) {
 			id,
 			apelido,
 			nome,
-			nascimento,
+			TO_CHAR(nascimento, 'YYYY-MM-DD') AS nascimento,
 			string_agg(s.stack_value, ',') AS stack
 		FROM
 			pessoas p
