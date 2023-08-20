@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/eduwr/go-rinha-de-backend/app"
+	"github.com/eduwr/go-rinha-de-backend/dbconfig"
 	"github.com/eduwr/go-rinha-de-backend/pessoas"
+	"github.com/joho/godotenv"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -13,8 +16,16 @@ import (
 
 func main() {
 	fmt.Println("HELLO RINHA DE BACKEND")
+	production := os.Getenv("GO_ENVIRONMENT") == "production"
 
-	db, err := sqlx.Connect("postgres", "host=localhost port=5432 dbname=rinha user=user password=pass sslmode=disable")
+	if !production {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
+
+	db, err := sqlx.Connect(dbconfig.NewDBConfig("postgres").GetConnString())
 	if err != nil {
 		log.Fatalln(err)
 	}
