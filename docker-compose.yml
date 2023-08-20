@@ -1,0 +1,77 @@
+version: '3.5'
+services:
+  api1:
+    image: eduwr/go-rinha:latest
+    hostname: api1
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=rinha
+      - DB_USER=user
+      - DB_PASS=pass
+      - GO_ENVIRONMENT=production
+    depends_on:
+      - db
+    expose:
+      - "3333"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: '0.5GB'
+  api2:
+    image: eduwr/go-rinha:latest
+    hostname: api2
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=rinha
+      - DB_USER=user
+      - DB_PASS=pass
+      - GO_ENVIRONMENT=production
+    depends_on:
+      - db
+    expose:
+      - "3333"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: '0.5GB'
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api1
+      - api2
+    ports:
+      - "9999:9999"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: '0.5GB'
+  db:
+    image: postgres
+    hostname: db
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: user
+      POSTGRES_DB: rinha
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: '1.5GB'
+volumes:
+  postgres_data:
+networks:
+  default:
+    driver: bridge
