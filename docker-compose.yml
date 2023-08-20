@@ -55,12 +55,12 @@ services:
   db:
     image: postgres
     hostname: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: pass
       POSTGRES_USER: user
       POSTGRES_DB: rinha
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     expose:
