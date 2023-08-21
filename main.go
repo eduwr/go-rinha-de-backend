@@ -7,7 +7,6 @@ import (
 
 	"github.com/eduwr/go-rinha-de-backend/app"
 	"github.com/eduwr/go-rinha-de-backend/dbconfig"
-	"github.com/eduwr/go-rinha-de-backend/pessoas"
 	"github.com/joho/godotenv"
 
 	"github.com/jmoiron/sqlx"
@@ -30,8 +29,6 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer db.Close()
-
-	db.MustExec(pessoas.PessoaSchema)
 
 	a := app.NewApp("Go! Rinha de Backend")
 	a.Setup(db)
