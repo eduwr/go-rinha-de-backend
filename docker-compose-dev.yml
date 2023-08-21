@@ -1,0 +1,16 @@
+version: '3.5'
+services:
+  db:
+    image: postgres
+    restart: always
+    hostname: db
+    volumes:
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: user
+      POSTGRES_DB: rinha
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"

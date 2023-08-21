@@ -42,7 +42,7 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 
 	app.Post("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-		p := pessoas.PessoaWithStack{}
+		p := pessoas.Pessoa{}
 
 		if err := c.BodyParser(&p); err != nil {
 			return c.Status(422).SendString("Unprocessable Entity")
