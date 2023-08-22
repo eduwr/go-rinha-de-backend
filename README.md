@@ -8,9 +8,7 @@
 
 E aí, galera da Rinha de Backend! 👋
 
-Apresento a vocês a minha arma secreta para essa batalha de código - a "Lutadora de Bits"! Minha API feita em Golang, temperada com um toque de Fiber e Postgres, está pronta para aguentar o tranco e enfrentar todos os desafios.
-
-Então, se preparem para testes de stress épicos, porque a "Lutadora de Bits" está aqui para brilhar! 💪😄
+Apresento a vocês a minha arma secreta para essa batalha de código - a Minha API feita em Golang, temperada com um toque de Fiber e Postgres, está pronta para aguentar o tranco e enfrentar todos os desafios.
 
 Nos vemos no ringue! 🥊🚀
 
