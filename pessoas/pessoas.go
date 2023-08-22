@@ -88,13 +88,11 @@ func Index(t string, db *sqlx.DB) ([]Pessoa, error) {
 		FROM
 			pessoas p
 		WHERE
-			p.nome ILIKE $1 OR
-			p.apelido ILIKE $1 OR
-			p.stacks ILIKE $1
+			(LOWER(p.nome) || ' ' || LOWER(p.apelido) || ' ' || LOWER(p.stacks)) LIKE '%' || LOWER($1) || '%'
 		LIMIT 50
 	`
 
-	err := db.Select(&pessoas, query, "%"+t+"%")
+	err := db.Select(&pessoas, query, t)
 
 	if err != nil {
 		return nil, err
