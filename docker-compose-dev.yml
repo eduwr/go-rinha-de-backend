@@ -5,6 +5,7 @@ services:
     restart: always
     hostname: db
     volumes:
+      - postgres_data:/var/lib/postgresql/data
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     environment:
       POSTGRES_PASSWORD: pass
@@ -14,3 +15,5 @@ services:
       - "5432:5432"
     expose:
       - "5432"
+volumes:
+  postgres_data:

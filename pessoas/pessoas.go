@@ -91,15 +91,13 @@ func Index(t string, db *sqlx.DB) ([]Pessoa, error) {
 			TO_CHAR(nascimento, 'YYYY-MM-DD') AS nascimento,
 			stacks
 		FROM
-			pessoas p
+			pessoas
 		WHERE
-			LOWER(p.nome) LIKE '%' || LOWER($1) || '%' OR
-			LOWER(p.apelido) LIKE '%' || LOWER($1) || '%' OR
-			LOWER(p.stacks) LIKE '%' || LOWER($1) || '%'
+			search LIKE '%' || $1 || '%'
 		LIMIT 50
 	`
 
-	err := db.Select(&pessoas, query, t)
+	err := db.Select(&pessoas, query, strings.ToLower(t))
 
 	if err != nil {
 		return nil, err
