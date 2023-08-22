@@ -78,6 +78,11 @@ func Show(id string, db *sqlx.DB) (Pessoa, error) {
 func Index(t string, db *sqlx.DB) ([]Pessoa, error) {
 	pessoas := []Pessoa{}
 
+	validationError := rinhaguard.CheckSearchTerm(t)
+	if validationError != nil {
+		return pessoas, validationError
+	}
+
 	query := `
 		SELECT
 			id,

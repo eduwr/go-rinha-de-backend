@@ -23,7 +23,12 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 		t := c.Query("t")
 		p, err := pessoas.Index(t, db)
 		if err != nil {
-			return c.Status(422).SendString(err.Error())
+			switch e := err.(type) {
+			case rinhaguard.ValidationError:
+				return c.Status(400).SendString(fmt.Sprintf("bad request/%s", e.Error()))
+			default:
+				return c.Status(500).SendString("Something went wrong")
+			}
 		}
 
 		return c.Status(200).JSON(p)

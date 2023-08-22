@@ -14,9 +14,7 @@ func (e ValidationError) Error() string {
 	return fmt.Sprintf("Validation errors: %v", e.FieldErrors)
 }
 
-func Check(i interface{}) error {
-	validate := validator.New()
-	err := validate.Struct(i)
+func handleErrors(err error) error {
 	if err != nil {
 		var fieldErrors []string
 		for _, validationErr := range err.(validator.ValidationErrors) {
@@ -24,21 +22,26 @@ func Check(i interface{}) error {
 		}
 		return NewValidationError(fieldErrors...)
 	}
+
 	return nil
+}
+
+func Check(i interface{}) error {
+	validate := validator.New()
+	err := validate.Struct(i)
+	return handleErrors(err)
 }
 
 func CheckUUID(id string) error {
 	validate := validator.New()
 	err := validate.Var(id, "uuid")
-	if err != nil {
-		var fieldErrors []string
-		for _, validationErr := range err.(validator.ValidationErrors) {
-			fieldErrors = append(fieldErrors, validationErr.Field()+" is invalid; ")
-		}
-		return NewValidationError(fieldErrors...)
-	}
+	return handleErrors(err)
+}
 
-	return nil
+func CheckSearchTerm(t string) error {
+	validate := validator.New()
+	err := validate.Var(t, "required")
+	return handleErrors(err)
 }
 
 func NewValidationError(fields ...string) ValidationError {
