@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer db.Close()
 
 	a := app.NewApp("Go! Rinha de Backend")
 	a.Setup(db)
