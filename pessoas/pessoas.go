@@ -43,6 +43,11 @@ func Create(p Pessoa, db *sqlx.DB) (*Pessoa, error) {
 }
 
 func Show(id string, db *sqlx.DB) (Pessoa, error) {
+	p := Pessoa{}
+	validationErr := rinhaguard.CheckUUID(id)
+	if validationErr != nil {
+		return p, validationErr
+	}
 	query := `
 		SELECT
 			id,
@@ -55,7 +60,6 @@ func Show(id string, db *sqlx.DB) (Pessoa, error) {
 		WHERE
 			p.id = $1
 	`
-	p := Pessoa{}
 
 	err := db.Get(&p, query, id)
 	if err != nil {

@@ -5,8 +5,10 @@ import (
 	"strconv"
 
 	"github.com/eduwr/go-rinha-de-backend/pessoas"
+	"github.com/eduwr/go-rinha-de-backend/rinhaguard"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type CustomContext struct {
@@ -34,7 +36,12 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 		p, err := pessoas.Show(id, db)
 
 		if err != nil {
-			return c.Status(404).SendString("Not Found")
+			switch e := err.(type) {
+			case rinhaguard.ValidationError:
+				return c.Status(400).SendString(fmt.Sprintf("bad request/%s", e.Error()))
+			default:
+				return c.Status(404).SendString("Not Found")
+			}
 		}
 
 		return c.Status(200).JSON(p)
@@ -45,13 +52,20 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 		p := pessoas.Pessoa{}
 
 		if err := c.BodyParser(&p); err != nil {
-			return c.Status(422).SendString("Unprocessable Entity/Bad Request")
+			return c.Status(400).SendString("Unprocessable Entity/Bad Request")
 		}
 
 		createdP, err := pessoas.Create(p, db)
 
 		if err != nil {
-			return c.Status(422).SendString(fmt.Sprintf("Unprocessable Entity/%s", err.Error()))
+			switch e := err.(type) {
+			case rinhaguard.ValidationError:
+				return c.Status(400).SendString(fmt.Sprintf("bad request/%s", e.Error()))
+			case *pq.Error:
+				return c.Status(422).SendString(fmt.Sprintf("Unprocessable Entity/%s", e.Error()))
+			default:
+				return c.Status(422).SendString(fmt.Sprintf("Unprocessable Entity/%s", err.Error()))
+			}
 		}
 
 		c.Set("Location", fmt.Sprintf("/pessoas/%s", createdP.Id))
