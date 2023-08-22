@@ -88,7 +88,9 @@ func Index(t string, db *sqlx.DB) ([]Pessoa, error) {
 		FROM
 			pessoas p
 		WHERE
-			(LOWER(p.nome) || ' ' || LOWER(p.apelido) || ' ' || LOWER(p.stacks)) LIKE '%' || LOWER($1) || '%'
+			LOWER(p.nome) LIKE '%' || LOWER($1) || '%' OR
+			LOWER(p.apelido) LIKE '%' || LOWER($1) || '%' OR
+			LOWER(p.stacks) LIKE '%' || LOWER($1) || '%'
 		LIMIT 50
 	`
 
