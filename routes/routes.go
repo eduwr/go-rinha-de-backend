@@ -30,7 +30,6 @@ func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 				return c.Status(500).SendString("Something went wrong")
 			}
 		}
-
 		return c.Status(200).JSON(p)
 	})
 
