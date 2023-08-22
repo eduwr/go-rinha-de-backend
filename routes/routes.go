@@ -19,7 +19,6 @@ type CustomContext struct {
 func RegisterRoutes(app *fiber.App, db *sqlx.DB) {
 	app.Get("/pessoas", func(c *fiber.Ctx) error {
 		c.Accepts("application/json")
-
 		t := c.Query("t")
 		p, err := pessoas.Index(t, db)
 		if err != nil {
