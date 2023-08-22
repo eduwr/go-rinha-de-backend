@@ -39,10 +39,16 @@ func Create(p Pessoa, db *sqlx.DB) (*Pessoa, error) {
 		return nil, err
 	}
 
+	addPessoaToCache(&p)
+
 	return &p, nil
 }
 
 func Show(id string, db *sqlx.DB) (Pessoa, error) {
+	if cachedPessoa := getPessoaFromCache(id); cachedPessoa != nil {
+		return *cachedPessoa, nil
+	}
+
 	p := Pessoa{}
 	validationErr := rinhaguard.CheckUUID(id)
 	if validationErr != nil {
