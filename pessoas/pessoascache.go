@@ -2,13 +2,11 @@ package pessoas
 
 import (
 	"sync"
-	"time"
 )
 
 type PessoaCache struct {
-	cache   map[string]*Pessoa
-	timeout time.Duration
-	mutex   sync.RWMutex
+	cache map[string]*Pessoa
+	mutex sync.RWMutex
 }
 
 var (
@@ -17,8 +15,7 @@ var (
 
 func init() {
 	pessoasCache = &PessoaCache{
-		cache:   make(map[string]*Pessoa),
-		timeout: 5 * time.Minute,
+		cache: make(map[string]*Pessoa),
 	}
 }
 
@@ -38,16 +35,4 @@ func addPessoaToCache(p *Pessoa) {
 	defer pessoasCache.mutex.Unlock()
 
 	pessoasCache.cache[p.Id] = p
-
-	go func(id string, timeout time.Duration) {
-		time.Sleep(timeout)
-		removePessoaFromCache(id)
-	}(p.Id, pessoasCache.timeout)
-}
-
-func removePessoaFromCache(id string) {
-	pessoasCache.mutex.Lock()
-	defer pessoasCache.mutex.Unlock()
-
-	delete(pessoasCache.cache, id)
 }
