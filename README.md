@@ -4,7 +4,7 @@
 
 [Repositório da Rinha de Backend 2023 Q3](https://github.com/zanfranceschi/rinha-de-backend-2023-q3)
 
-## A Lutadora de Bits - API GoLang é a Minha Representante!
+## Tá vendo esse Gopher bravo? ele é bravo mesmo!
 
 E aí, galera da Rinha de Backend! 👋
 

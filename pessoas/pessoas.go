@@ -39,7 +39,7 @@ func Create(p Pessoa, db *sqlx.DB) (*Pessoa, error) {
 		return nil, err
 	}
 
-	go addPessoaToCache(&p)
+	addPessoaToCache(&p)
 
 	return &p, nil
 }
