@@ -39,7 +39,7 @@ func Create(p Pessoa, db *sqlx.DB) (*Pessoa, error) {
 		return nil, err
 	}
 
-	addPessoaToCache(&p)
+	go addPessoaToCache(&p)
 
 	return &p, nil
 }
@@ -65,7 +65,8 @@ func Show(id string, db *sqlx.DB) (Pessoa, error) {
 			pessoas p
 		WHERE
 			p.id = $1
-	`
+		LIMIT 1	
+		`
 
 	err := db.Get(&p, query, id)
 	if err != nil {
